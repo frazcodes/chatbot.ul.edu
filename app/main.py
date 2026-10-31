@@ -243,6 +243,11 @@ def chat(req: ChatRequest, request: Request):
 app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(config.STATIC_DIR / "logo.png")
+
+
 @app.get("/", include_in_schema=False)
 @app.get("/demo", include_in_schema=False)
 def demo():
