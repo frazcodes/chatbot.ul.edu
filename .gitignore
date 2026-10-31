@@ -6,5 +6,4 @@ models/
 data/unanswered.jsonl
 data/watcher_state.json
 data/raw/*.jsonl
-data/index/*
-!data/index/.gitkeep
+data/index/embeddings_cache.npz
