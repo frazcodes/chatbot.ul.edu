@@ -7,6 +7,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import threading
 from contextlib import asynccontextmanager
 from typing import Literal
 
@@ -28,16 +29,26 @@ limiter = SlidingWindowLimiter(config.RATE_LIMIT_PER_MIN, 60)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.pipeline = None
+    app.state.pipeline_ready = False
     watcher_task = None
-    try:
-        from .pipeline import RagPipeline
 
-        app.state.pipeline = RagPipeline.from_disk()
-        log.info("Pipeline ready: %d chunks", len(app.state.pipeline.index.chunks))
-    except FileNotFoundError:
-        log.warning("Index not found. Run: python -m app.crawler && python -m app.ingest")
-    except Exception:
-        log.exception("Could not start the pipeline")
+    def _load_pipeline():
+        # Loads in a background thread so the HTTP server never blocks on the
+        # (slow) embedder/model load; /api/health and / stay reachable and
+        # /api/chat answers "not ready" until the pipeline is up.
+        try:
+            from .pipeline import RagPipeline
+
+            app.state.pipeline = RagPipeline.from_disk()
+            log.info("Pipeline ready: %d chunks", len(app.state.pipeline.index.chunks))
+        except FileNotFoundError:
+            log.warning("Index not found. Run: python -m app.crawler && python -m app.ingest")
+        except Exception:
+            log.exception("Could not start the pipeline")
+        finally:
+            app.state.pipeline_ready = True
+
+    threading.Thread(target=_load_pipeline, name="pipeline-loader", daemon=True).start()
 
     if config.AUTO_SYNC_ENABLED:
         from .watcher import watcher_agent
@@ -141,8 +152,9 @@ def health():
             pass
 
     from .watcher import watcher_agent
+    ready = getattr(app.state, "pipeline_ready", True)
     return {
-        "status": "ok" if p else "index_missing",
+        "status": "ok" if p else ("loading" if not ready else "index_missing"),
         "chunks": len(p.index.chunks) if p else 0,
         "unanswered_count": unanswered_count,
         "watcher": {

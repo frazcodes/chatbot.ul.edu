@@ -1,9 +1,13 @@
 """Multilingual sentence embeddings (runs locally, free, no API key)."""
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 
 from . import config
+
+log = logging.getLogger("ul-chatbot")
 
 
 class Embedder:
@@ -17,7 +21,18 @@ class Embedder:
             self.model_name = str(local_model_dir)
         else:
             self.model_name = model_name or config.EMBED_MODEL
-        self.model = SentenceTransformer(self.model_name)
+
+        log.info("Loading embedder from %s", self.model_name)
+        try:
+            # Offline-first: the model is baked into the image at build time.
+            # This skips the HuggingFace hub re-validation requests that can
+            # hang for a very long time in networks with restricted egress.
+            self.model = SentenceTransformer(self.model_name, local_files_only=True)
+        except Exception:
+            log.exception(
+                "Local/offline load failed for %s; retrying with hub access", self.model_name
+            )
+            self.model = SentenceTransformer(self.model_name)
         self._e5 = "e5" in self.model_name.lower()
 
     def _encode(self, texts: list[str]) -> np.ndarray:
