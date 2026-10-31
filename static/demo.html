@@ -1,127 +1,646 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>University of Layyah — AI Chatbot Live Demo</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>University of Layyah — AI Assistant Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --primary: #064e3b;
+      --primary-light: #065f46;
+      --emerald: #059669;
+      --gold: #d97706;
+      --gold-light: #fbbf24;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --bg-page: #f8fafc;
+      --card-bg: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
-      color: #0f172a;
-      background: linear-gradient(160deg, #f0fdf4 0%, #ffffff 45%, #f8fafc 100%);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--slate-900);
       line-height: 1.6;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
-    header {
-      background: linear-gradient(135deg, #064e3b 0%, #065f46 55%, #047857 100%);
-      color: #fff;
-      padding: 46px 24px 42px;
+
+    /* Top Utility Bar */
+    .top-bar {
+      background: #022c22;
+      color: #cbd5e1;
+      font-size: 12px;
+      padding: 7px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+    }
+    .top-bar a { color: #f8fafc; text-decoration: none; margin-left: 16px; transition: color .2s; }
+    .top-bar a:hover { color: var(--gold-light); }
+    .top-bar-left { display: flex; align-items: center; gap: 14px; }
+    .top-pill {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    /* Executive Navigation */
+    .navbar {
+      background: #ffffff;
+      border-bottom: 3px solid var(--gold);
+      box-shadow: 0 4px 20px -2px rgba(6, 78, 59, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--slate-900);
+    }
+    .brand-logo-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #ffffff;
+      padding: 3px;
+      box-shadow: 0 0 0 2px var(--gold-light), 0 4px 10px rgba(6, 78, 59, 0.18);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .brand-logo-box img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+    .brand-text h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .brand-text span {
+      font-size: 12px;
+      color: var(--slate-500);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--primary);
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      transition: all .2s ease;
+    }
+    .btn-portal:hover { background: #d1fae5; border-color: #6ee7b7; transform: translateY(-1px); }
+    .btn-chat-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #ffffff;
+      background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+      box-shadow: 0 4px 14px rgba(6, 78, 59, 0.25);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .btn-chat-trigger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(6, 78, 59, 0.35); }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(180deg, #ecfdf5 0%, #f8fafc 100%);
+      padding: 56px 24px 40px;
       text-align: center;
-      border-bottom: 4px solid #fbbf24;
+      position: relative;
+      overflow: hidden;
     }
-    header h1 { margin: 0 0 8px; font-size: 32px; letter-spacing: .3px; }
-    header p { margin: 0; opacity: .93; font-size: 15.5px; }
-    .badge {
-      display: inline-block; background: rgba(255,255,255,.16); color: #bbf7d0;
-      border: 1px solid rgba(187,247,208,.5); border-radius: 999px;
-      padding: 3px 12px; font-size: 12.5px; font-weight: 600; margin-left: 8px;
-      vertical-align: middle;
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(255,255,255,0) 70%);
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
     }
-    main { max-width: 880px; margin: 0 auto; padding: 34px 24px 130px; }
-    .card {
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
-      padding: 22px 24px; margin-bottom: 20px;
-      box-shadow: 0 4px 16px rgba(6,78,59,.06);
+    .hero-container { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1.5px solid #a7f3d0;
+      box-shadow: 0 4px 12px rgba(6, 78, 59, 0.06);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
     }
-    .card h2 { margin: 0 0 12px; font-size: 19px; color: #064e3b; }
-    .card ul { margin: 8px 0; padding-inline-start: 20px; }
-    .card li { margin-bottom: 6px; }
-    .step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
-    .step-num {
-      flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
-      background: #059669; color: #fff; font-weight: 700;
-      display: grid; place-items: center; font-size: 15px;
+    .radar-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      position: relative;
     }
-    pre {
-      background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 10px;
-      overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 12px 0 0;
+    .radar-pulse::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid #10b981;
+      animation: pulse-ring 1.8s infinite cubic-bezier(0,0,.2,1);
     }
-    .tag { color: #6ee7b7; }
-    .attr { color: #fbbf24; }
-    .hint { font-size: 13.5px; color: #64748b; margin-top: 10px; }
-    .try {
-      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
-      padding: 16px 18px; margin-top: 6px;
+    @keyframes pulse-ring {
+      0% { transform: scale(.5); opacity: 1; }
+      100% { transform: scale(2.4); opacity: 0; }
     }
-    .try b { color: #065f46; }
-    code.inline {
-      background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 5px;
-      padding: 1px 6px; font-size: 13px;
+    .hero h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 38px;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.25;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
     }
-    footer { text-align: center; color: #94a3b8; font-size: 13px; padding: 0 24px 30px; }
+    .hero h2 span {
+      background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 17px;
+      color: var(--slate-600);
+      max-width: 680px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+
+    /* Telemetry Metric Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      max-width: 1040px;
+      margin: 0 auto 48px;
+      padding: 0 24px;
+    }
+    .metric-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: all .25s ease;
+    }
+    .metric-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(6, 78, 59, 0.1); border-color: #a7f3d0; }
+    .metric-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #f0fdf4;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      border: 1px solid #bbf7d0;
+    }
+    .metric-info h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.2;
+    }
+    .metric-info p {
+      font-size: 12.5px;
+      color: var(--slate-500);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* Interactive Showcase Section */
+    .section-container {
+      max-width: 1040px;
+      margin: 0 auto 56px;
+      padding: 0 24px;
+    }
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-sub {
+      font-size: 14px;
+      color: var(--slate-500);
+      margin-bottom: 20px;
+    }
+    .prompt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+    }
+    .prompt-card {
+      background: #ffffff;
+      border: 1.5px solid var(--slate-200);
+      border-radius: 14px;
+      padding: 18px 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all .2s cubic-bezier(.16,1,.3,1);
+      box-shadow: 0 2px 8px rgba(0,0,0,.03);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .prompt-card:hover {
+      border-color: var(--emerald);
+      background: #f0fdf4;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(6, 78, 59, 0.08);
+    }
+    .prompt-card:active { transform: scale(0.98); }
+    .prompt-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .prompt-text {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--slate-800);
+      line-height: 1.45;
+    }
+    .prompt-action {
+      margin-top: 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--emerald);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Live Autonomous Watcher Console Card */
+    .admin-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 6px 24px -4px rgba(6, 78, 59, 0.06);
+      margin-bottom: 32px;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--slate-100);
+    }
+    .admin-title-box h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-title-box p {
+      font-size: 13px;
+      color: var(--slate-500);
+      margin-top: 2px;
+    }
+    .btn-sync {
+      background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+      color: #ffffff;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
+      transition: all .2s;
+    }
+    .btn-sync:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(6, 78, 59, 0.3); }
+    .btn-sync:disabled { background: var(--slate-500); cursor: not-allowed; opacity: 0.6; }
+    
+    .embed-box {
+      margin-top: 16px;
+      background: #0f172a;
+      color: #94a3b8;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: monospace;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      overflow-x: auto;
+    }
+    .embed-box code { color: #38bdf8; }
+
+    /* Footer */
+    footer {
+      background: #022c22;
+      color: #94a3b8;
+      padding: 32px 24px;
+      margin-top: auto;
+      text-align: center;
+      font-size: 13px;
+      border-top: 3px solid var(--gold);
+    }
+    footer a { color: var(--gold-light); text-decoration: none; font-weight: 600; }
+
+    @media (max-width: 640px) {
+      .hero h2 { font-size: 28px; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .top-bar-left span:last-child { display: none; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>University of Layyah</h1>
-    <p>AI Admissions &amp; Student Desk — live chatbot widget demo <span class="badge">● Live</span></p>
+
+  <!-- Top Utility Bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="top-pill">HEC Recognized</span>
+      <span>جامعہ لیّہ • University of Layyah, Punjab, Pakistan</span>
+    </div>
+    <div>
+      <a href="tel:0606920247">📞 0606-920247</a>
+      <a href="https://wa.me/923078766389" target="_blank">💬 WhatsApp</a>
+      <a href="mailto:info@ul.edu.pk">✉️ info@ul.edu.pk</a>
+    </div>
+  </div>
+
+  <!-- Executive Navigation -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a class="brand" href="/">
+        <div class="brand-logo-box">
+          <img src="/static/logo.png" alt="University of Layyah Logo">
+        </div>
+        <div class="brand-text">
+          <h1>University of Layyah</h1>
+          <span>AI Campus Assistant & Student Desk</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a class="btn-portal" href="https://ul.edu.pk/page/How-to-Apply" target="_blank">Admissions Portal ↗</a>
+        <button class="btn-chat-trigger" onclick="openChat()">Chatbot Kholein 💬</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <div class="card">
-      <h2>👈 Neeche right corner mein green button dekhein</h2>
-      <div class="try">
-        Wahan <b>"UL Assistant • پوچھیں"</b> button hai — us par click karein, chat panel khul jayega.
-        Phir koi bhi sawal likhein, misal ke taur par:
-        <ul>
-          <li><b>Admission kab start hota hai?</b></li>
-          <li><b>Fee structure kya hai?</b></li>
-          <li><b>Kon kon se programs hain?</b></li>
-          <li><b>Merit list kab aayegi?</b></li>
-        </ul>
-        Jawab <b>Urdu / Roman Urdu / English</b> — teenon mein aata hai, official ul.edu.pk sources ke saath
-        aur clickable buttons (Call, WhatsApp, Portal) ke saath.
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-badge">
+        <span class="radar-pulse"></span>
+        <span>Executive Presentation • Vice Chancellor & Campus Community</span>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>Apni website mein kaise lagayein</h2>
-      <div class="step">
-        <div class="step-num">1</div>
-        <div>Apni website ke HTML mein <code class="inline">&lt;/body&gt;</code> tag se theek pehle yeh <b>ek line</b> paste karein:</div>
-      </div>
-<pre><span class="tag">&lt;script</span> <span class="attr">src</span>="https://chatbot-ul-edu-3a24a308.edge-5.komuta.app/static/chatbot.js"
-        <span class="attr">data-api</span>="https://chatbot-ul-edu-3a24a308.edge-5.komuta.app"
-        <span class="attr">defer</span>&gt;&lt;/script&gt;</pre>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div>Bas! Website refresh karein — chatbot ka button right corner mein aa jayega. Koi dependency, koi build nahi.</div>
-      </div>
-      <p class="hint">
-        <b>Note:</b> Aapki website <b>ul.edu.pk</b> automatically allowed origin hai (CORS) — embed karte hi chat chalne lagega.
-        Isse pehle se maujood kisi bhi page/HTML mein kaam karta hai.
+      <h2>
+        University of Layyah <span>Next-Gen AI Assistant</span>
+      </h2>
+      <p>
+        Admissions, fee structures, merit lists, programs, aur official notices ke baray mein <strong>Urdu, Roman Urdu, ya English</strong> mein fori tasdeeq shuda maloomat hasil karein.
       </p>
     </div>
+  </section>
 
-    <div class="card">
-      <h2>Optional: rang / logo customize</h2>
-<pre><span class="tag">&lt;script</span> <span class="attr">src</span>="https://chatbot-ul-edu-3a24a308.edge-5.komuta.app/static/chatbot.js"
-        <span class="attr">data-api</span>="https://chatbot-ul-edu-3a24a308.edge-5.komuta.app"
-        <span class="attr">data-color</span>="#0f4c5c"
-        <span class="attr">data-logo</span>="https://ul.edu.pk/logo.png"
-        <span class="attr">defer</span>&gt;&lt;/script&gt;</pre>
-      <p class="hint">
-        <code class="inline">data-api</code> optional hai — agar na dein to widget khud script ke server ko use kar leta hai.
-        Rang university ke green/gold theme se match kar sakte hain.
-      </p>
+  <!-- Telemetry Metrics Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon">📚</div>
+      <div class="metric-info">
+        <h3 id="chunks-stat">1,781+</h3>
+        <p>Verified RAG Chunks</p>
+      </div>
     </div>
-  </main>
+    <div class="metric-card">
+      <div class="metric-icon">🔄</div>
+      <div class="metric-info">
+        <h3 id="pages-stat">575+</h3>
+        <p>Monitored Pages & PDFs</p>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">⚡</div>
+      <div class="metric-info">
+        <h3>Groq Sub-Second</h3>
+        <p>Real-Time SSE Streaming</p>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">🛡️</div>
+      <div class="metric-info">
+        <h3>100% Grounded</h3>
+        <p>Direct Official Provenance</p>
+      </div>
+    </div>
+  </div>
 
-  <footer>University of Layyah • Official AI Desk • Demo page served live from the chatbot server</footer>
+  <!-- Interactive Question Showcase -->
+  <div class="section-container">
+    <h3 class="section-title">💡 Try Asking These Questions</h3>
+    <p class="section-sub">Click kisi bhi sawal par karein — chatbot widget khud open ho kar fori jawab stream karega:</p>
 
-  <!-- ===== WIDGET — relative path so it works same-origin (no CORS) ===== -->
-  <script src="/static/chatbot.js" defer></script>
+    <div class="prompt-grid">
+      <div class="prompt-card" onclick="askQuestion('BS Computer Science aur AI ke eligibility criteria kya hain?')">
+        <div>
+          <div class="prompt-tag">🎓 Admissions</div>
+          <div class="prompt-text">BS Computer Science aur AI ke eligibility criteria kya hain?</div>
+        </div>
+        <div class="prompt-action">Ask Assistant →</div>
+      </div>
+
+      <div class="prompt-card" onclick="askQuestion('Fee structure kya hai BS aur MS programs ka?')">
+        <div>
+          <div class="prompt-tag">💳 Fees & Challan</div>
+          <div class="prompt-text">Fee structure kya hai BS aur MS programs ka per semester?</div>
+        </div>
+        <div class="prompt-action">Ask Assistant →</div>
+      </div>
+
+      <div class="prompt-card" onclick="askQuestion('Merit lists kahan se download karein aur last date kab hai?')">
+        <div>
+          <div class="prompt-tag">📋 Merit Lists</div>
+          <div class="prompt-text">Merit lists kahan se download karein aur latest schedule kya hai?</div>
+        </div>
+        <div class="prompt-action">Ask Assistant →</div>
+      </div>
+
+      <div class="prompt-card" onclick="askQuestion('University of Layyah mein kon kon se faculties aur programs hain?')">
+        <div>
+          <div class="prompt-tag">🏛️ Academics</div>
+          <div class="prompt-text">University of Layyah mein total kitne programs aur faculties hain?</div>
+        </div>
+        <div class="prompt-action">Ask Assistant →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Autonomous Watcher Status & Embedding Code Console -->
+  <div class="section-container">
+    <div class="admin-card">
+      <div class="admin-header">
+        <div class="admin-title-box">
+          <h3>
+            <span>🔄</span> Autonomous PDF & Website Watcher Agent
+          </h3>
+          <p id="watcher-meta">Monitoring notices, downloadable merit PDFs, and university admission boards in real-time.</p>
+        </div>
+        <button id="btn-sync-now" class="btn-sync" onclick="triggerManualSync()">Sync Website & PDFs Now</button>
+      </div>
+      <div id="sync-status-msg" style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #064e3b; display: none;"></div>
+
+      <div style="margin-top: 18px;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--slate-600); text-transform: uppercase; letter-spacing: 0.4px;">Official Embed Code for ul.edu.pk:</div>
+        <div class="embed-box">
+          <code>&lt;script src="https://ul.edu.pk/static/chatbot.js" defer&gt;&lt;/script&gt;</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div style="max-width: 1040px; margin: 0 auto;">
+      <p style="margin-bottom: 6px;"><strong>جامعہ لیّہ • University of Layyah</strong> — Directorate of Academics & Information Technology Cell</p>
+      <p style="font-size: 12px; opacity: 0.8;">Official RAG AI Assistant Architecture • Built with Dense Hybrid Indexing & Real-Time Autonomous Sync</p>
+    </div>
+  </footer>
+
+  <script>
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/admin/sync-status');
+        if (res.ok) {
+          const d = await res.json();
+          document.getElementById('chunks-stat').innerText = `${d.current_index_chunks}+`;
+          document.getElementById('pages-stat').innerText = `${d.tracked_pages_count}+`;
+          document.getElementById('watcher-meta').innerText = `Monitored: ${d.tracked_pages_count} pages/PDFs across ${d.seeds_monitored} priority seeds. Interval: ${d.sync_interval_minutes} mins.`;
+        }
+      } catch (e) {}
+    }
+
+    async function triggerManualSync() {
+      const btn = document.getElementById('btn-sync-now');
+      const msg = document.getElementById('sync-status-msg');
+      btn.disabled = true;
+      btn.innerText = 'Scanning website & PDFs...';
+      msg.style.display = 'block';
+      msg.style.color = '#064e3b';
+      msg.innerText = 'Watcher Agent nayi PDF files aur website notices check kar raha hai...';
+      try {
+        const res = await fetch('/api/admin/sync?wait=true', { method: 'POST' });
+        const data = await res.json();
+        if (data.status === 'completed') {
+          msg.innerText = `Sync kamyabi se mukammal! Naye pages: ${data.stats.new_pages_indexed || 0}, Modified: ${data.stats.modified_pages_indexed || 0}, Chunks: ${data.stats.new_chunks_added || 0}, Total Chunks: ${data.total_chunks}`;
+        } else {
+          msg.innerText = data.message || 'Sync background mein shuru ho gaya hai.';
+        }
+        loadStats();
+      } catch (err) {
+        msg.style.color = '#dc2626';
+        msg.innerText = 'Sync request fail ho gayi: ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Sync Website & PDFs Now';
+      }
+    }
+
+    function openChat() {
+      const host = document.querySelector('[data-ul-chatbot]');
+      if (host && host.shadowRoot) {
+        const launch = host.shadowRoot.querySelector('.launch');
+        if (launch) launch.click();
+      }
+    }
+
+    function askQuestion(q) {
+      openChat();
+      setTimeout(() => {
+        const host = document.querySelector('[data-ul-chatbot]');
+        if (host && host.shadowRoot) {
+          const input = host.shadowRoot.querySelector('textarea');
+          const form = host.shadowRoot.querySelector('form');
+          if (input && form) {
+            input.value = q;
+            form.dispatchEvent(new Event('submit', { cancelable: true }));
+          }
+        }
+      }, 150);
+    }
+
+    loadStats();
+  </script>
+
+  <!-- Embed Chatbot Widget -->
+  <script src="/static/chatbot.js?v=executive_v2" defer></script>
 </body>
 </html>
