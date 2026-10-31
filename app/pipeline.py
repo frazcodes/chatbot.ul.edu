@@ -148,11 +148,22 @@ class RagPipeline:
 
     @classmethod
     def from_disk(cls) -> "RagPipeline":
+        import time
+
         from .embeddings import get_embedder
         from .llm import LLM
         from .store import Index
 
-        return cls(Index.load(config.INDEX_DIR), get_embedder(), LLM())
+        t0 = time.time()
+        log.info("Pipeline load: reading index files from %s", config.INDEX_DIR)
+        index = Index.load(config.INDEX_DIR)
+        log.info("Pipeline load: index read (%d chunks, %.1fs)", len(index.chunks), time.time() - t0)
+
+        t1 = time.time()
+        embedder = get_embedder()
+        log.info("Pipeline load: embedder ready (%.1fs)", time.time() - t1)
+
+        return cls(index, embedder, LLM())
 
     def _log_unanswered(self, question: str, search_query: str) -> None:
         try:

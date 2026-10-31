@@ -4,6 +4,16 @@ Run:  uvicorn app.main:app --host 0.0.0.0 --port 8000
 """
 from __future__ import annotations
 
+import os
+
+# Pin compute threads BEFORE numpy/torch get imported: on a big host node a
+# 1-core-limited container otherwise spawns dozens of OpenMP threads and the
+# resulting contention makes startup look frozen.
+os.environ.setdefault("OMP_NUM_THREADS", "2")
+os.environ.setdefault("MKL_NUM_THREADS", "2")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "2")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+
 import asyncio
 import json
 import logging
@@ -48,7 +58,35 @@ async def lifespan(app: FastAPI):
         finally:
             app.state.pipeline_ready = True
 
+    def _dump_all_threads():
+        import sys
+        import traceback
+
+        for tid, frame in sys._current_frames().items():
+            th = next((t for t in threading.enumerate() if t.ident == tid), None)
+            if th and th.name != "pipeline-load-watchdog":
+                log.warning(
+                    "Startup watchdog - thread %s stuck stack:\n%s",
+                    th.name,
+                    "".join(traceback.format_stack(frame)),
+                )
+
+    def _loader_watchdog():
+        # If the pipeline cannot load within 30s, dump every thread's stack to
+        # the logs so the exact hang point is visible instead of a silent stall.
+        import time
+
+        dumps = 0
+        while not app.state.pipeline_ready and dumps < 10:
+            time.sleep(30)
+            if app.state.pipeline_ready:
+                return
+            dumps += 1
+            log.warning("Startup watchdog - pipeline still not ready after %ds", dumps * 30)
+            _dump_all_threads()
+
     threading.Thread(target=_load_pipeline, name="pipeline-loader", daemon=True).start()
+    threading.Thread(target=_loader_watchdog, name="pipeline-load-watchdog", daemon=True).start()
 
     if config.AUTO_SYNC_ENABLED:
         from .watcher import watcher_agent
